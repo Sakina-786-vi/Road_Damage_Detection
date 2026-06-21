@@ -92,17 +92,6 @@ road_damage_app/
 
 ---
 
-## 🎯 Priority Levels
-
-| Level | Typical Repair Window | Cost Rate |
-|-------|----------------------|-----------|
-| Low Priority | 12–24 months | $15/m² |
-| Medium Priority | 6–12 months | $40/m² |
-| High Priority | 1–3 months | $90/m² |
-| Critical Priority | Within 1–2 weeks | $175/m² |
-
----
-
 ## 🛠️ Tech Stack
 
 - **Backend**: Python 3.10+, Flask 3.0
