@@ -1,9 +1,9 @@
 Flask==3.0.3
 gunicorn==23.0.0
-numpy==1.26.4
+numpy
 opencv-python-headless==4.9.0.80
 Pillow==10.4.0
-scikit-learn==1.5.1
+scikit-learn
 joblib==1.4.2
 
 langchain==0.2.17
