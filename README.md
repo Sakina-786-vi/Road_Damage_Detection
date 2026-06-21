@@ -62,7 +62,7 @@ road_damage_app/
 ├── templates/
 │   └── index.html          # Main dashboard UI
 └── static/
-    ├── css/style.css       # Design system & component styles
+    ├── style.css       # Design system & component styles
     └── js/app.js           # Frontend logic (drag-drop, API, rendering)
 ```
 
