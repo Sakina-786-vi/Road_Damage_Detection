@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Road Damage Assessment System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+
+<!-- ═══════════════ NAVBAR ═══════════════ -->
+<nav class="navbar navbar-light">
+  <div class="container-fluid px-4">
+    <div class="d-flex align-items-center gap-3">
+      <div class="nav-icon-wrap">
+        <i class="fas fa-road"></i>
+      </div>
+      <div>
+        <span class="navbar-brand mb-0">RoadScan AI</span>
+        <div class="nav-tagline">Infrastructure Assessment System</div>
+      </div>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <span class="badge-version">v2.0</span>
+      <div class="status-pill" id="systemStatus">
+        <span class="status-dot"></span>
+        <span>System Online</span>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero-section">
+  <div class="container">
+    <div class="row align-items-center gy-4">
+      <div class="col-lg-6">
+        <div class="hero-eyebrow">Powered by OpenCV · Scikit-learn · Gemini AI</div>
+        <h1 class="hero-title">Road Damage<br><span class="hero-accent">Assessed in Seconds</span></h1>
+        <p class="hero-body">
+          Upload a road photograph. Our computer vision pipeline measures crack density,
+          damaged area, and texture roughness — then classifies repair priority and
+          generates a professional inspection report.
+        </p>
+        <div class="hero-stats">
+          <div class="hstat"><span class="hstat-val">5</span><span class="hstat-lbl">CV Metrics</span></div>
+          <div class="hstat-divider"></div>
+          <div class="hstat"><span class="hstat-val">4</span><span class="hstat-lbl">Priority Levels</span></div>
+          <div class="hstat-divider"></div>
+          <div class="hstat"><span class="hstat-val">AI</span><span class="hstat-lbl">Report Gen</span></div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="upload-card" id="uploadCard">
+          <div class="upload-zone" id="dropZone">
+            <input type="file" id="imageInput" accept="image/*" class="d-none" />
+            <div class="upload-idle" id="uploadIdle">
+              <div class="upload-icon-ring">
+                <i class="fas fa-camera-retro"></i>
+              </div>
+              <h4 class="upload-cta">Drop road image here</h4>
+              <p class="upload-sub">or <button class="btn-link-inline" onclick="document.getElementById('imageInput').click()">browse files</button></p>
+              <div class="upload-formats">PNG · JPG · WEBP · BMP — up to 16 MB</div>
+            </div>
+            <div class="upload-preview d-none" id="uploadPreview">
+              <img id="previewImg" src="" alt="Preview" />
+              <div class="preview-actions">
+                <span id="previewName" class="preview-filename"></span>
+                <button class="btn-clear" onclick="clearImage()"><i class="fas fa-times"></i></button>
+              </div>
+            </div>
+          </div>
+          <button class="btn-analyze" id="analyzeBtn" onclick="analyzeImage()" disabled>
+            <i class="fas fa-magnifying-glass-chart me-2"></i>
+            Analyse Road Condition
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ PIPELINE STEPS ═══════════════ -->
+<section class="pipeline-section">
+  <div class="container">
+    <div class="section-label">ANALYSIS PIPELINE</div>
+    <div class="row g-3 mt-2">
+      <div class="col-6 col-md-3">
+        <div class="pipe-step">
+          <div class="pipe-num">01</div>
+          <div class="pipe-icon"><i class="fas fa-image"></i></div>
+          <div class="pipe-title">Image Ingestion</div>
+          <div class="pipe-desc">OpenCV loads & pre-processes the road photograph</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="pipe-step">
+          <div class="pipe-num">02</div>
+          <div class="pipe-icon"><i class="fas fa-eye"></i></div>
+          <div class="pipe-title">Feature Extraction</div>
+          <div class="pipe-desc">Adaptive thresholding, Canny edges, Laplacian texture</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="pipe-step">
+          <div class="pipe-num">03</div>
+          <div class="pipe-icon"><i class="fas fa-brain"></i></div>
+          <div class="pipe-title">ML Classification</div>
+          <div class="pipe-desc">Random Forest predicts repair priority with confidence score</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="pipe-step">
+          <div class="pipe-num">04</div>
+          <div class="pipe-icon"><i class="fas fa-file-lines"></i></div>
+          <div class="pipe-title">AI Report</div>
+          <div class="pipe-desc">Gemini generates professional inspection documentation</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ LOADING OVERLAY ═══════════════ -->
+<div class="loading-overlay d-none" id="loadingOverlay">
+  <div class="loading-card">
+    <div class="loading-rings">
+      <div class="ring ring-1"></div>
+      <div class="ring ring-2"></div>
+      <div class="ring ring-3"></div>
+      <i class="fas fa-road loading-road-icon"></i>
+    </div>
+    <h4 class="loading-title">Analysing Road Condition</h4>
+    <div class="loading-steps" id="loadingSteps">
+      <div class="lstep active" id="lstep1"><i class="fas fa-spinner fa-spin me-2"></i>Processing image with OpenCV…</div>
+      <div class="lstep" id="lstep2"><i class="fas fa-circle me-2"></i>Extracting damage features…</div>
+      <div class="lstep" id="lstep3"><i class="fas fa-circle me-2"></i>Running ML classifier…</div>
+      <div class="lstep" id="lstep4"><i class="fas fa-circle me-2"></i>Generating AI inspection report…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ RESULTS SECTION ═══════════════ -->
+<section class="results-section d-none" id="resultsSection">
+  <div class="container">
+
+    <!-- Priority Banner -->
+    <div class="priority-banner" id="priorityBanner">
+      <div class="pb-left">
+        <div class="pb-label">REPAIR PRIORITY</div>
+        <div class="pb-value" id="priorityValue">—</div>
+      </div>
+      <div class="pb-right">
+        <div class="pb-conf"><span id="confValue">—</span>% confidence</div>
+        <div class="pb-cost">Est. Cost: <strong id="costValue">—</strong></div>
+      </div>
+    </div>
+
+    <!-- Image Comparison -->
+    <div class="row g-4 mt-2">
+      <div class="col-md-6">
+        <div class="result-card">
+          <div class="rc-header">
+            <i class="fas fa-image me-2"></i>Original Image
+          </div>
+          <div class="rc-img-wrap">
+            <img id="origImg" src="" alt="Original road image" />
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="result-card">
+          <div class="rc-header">
+            <i class="fas fa-binoculars me-2"></i>Damage Detection Overlay
+            <span class="rc-badge">OpenCV</span>
+          </div>
+          <div class="rc-img-wrap">
+            <img id="procImg" src="" alt="Processed road image" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metrics Grid -->
+    <div class="metrics-grid mt-4" id="metricsGrid">
+      <div class="metric-card">
+        <div class="mc-icon damage"><i class="fas fa-percent"></i></div>
+        <div class="mc-label">Damage Area</div>
+        <div class="mc-value" id="metDamage">—</div>
+        <div class="mc-sub">of road surface</div>
+        <div class="mc-bar"><div class="mc-fill" id="barDamage"></div></div>
+      </div>
+      <div class="metric-card">
+        <div class="mc-icon regions"><i class="fas fa-object-group"></i></div>
+        <div class="mc-label">Damaged Regions</div>
+        <div class="mc-value" id="metRegions">—</div>
+        <div class="mc-sub">distinct zones</div>
+      </div>
+      <div class="metric-card">
+        <div class="mc-icon crack"><i class="fas fa-timeline"></i></div>
+        <div class="mc-label">Crack Density</div>
+        <div class="mc-value" id="metCrack">—</div>
+        <div class="mc-sub">index (0–1)</div>
+        <div class="mc-bar"><div class="mc-fill" id="barCrack"></div></div>
+      </div>
+      <div class="metric-card">
+        <div class="mc-icon roughness"><i class="fas fa-wave-square"></i></div>
+        <div class="mc-label">Texture Roughness</div>
+        <div class="mc-value" id="metRoughness">—</div>
+        <div class="mc-sub">score (0–1)</div>
+        <div class="mc-bar"><div class="mc-fill" id="barRoughness"></div></div>
+      </div>
+      <div class="metric-card">
+        <div class="mc-icon dark"><i class="fas fa-circle-half-stroke"></i></div>
+        <div class="mc-label">Dark Surface</div>
+        <div class="mc-value" id="metDark">—</div>
+        <div class="mc-sub">damaged asphalt</div>
+        <div class="mc-bar"><div class="mc-fill" id="barDark"></div></div>
+      </div>
+      <div class="metric-card">
+        <div class="mc-icon cost-icon"><i class="fas fa-indian-rupee-sign"></i></div>
+        <div class="mc-label">Repair Cost</div>
+        <div class="mc-value" id="metCost">—</div>
+        <div class="mc-sub" id="metCostSub">estimated INR</div>
+      </div>
+    </div>
+
+    <!-- Priority Probability Bars -->
+    <div class="prob-section mt-4">
+      <div class="ps-header">ML Classification Probabilities</div>
+      <div id="probBars" class="prob-bars"></div>
+    </div>
+
+    <!-- AI Report -->
+    <div class="report-section mt-4">
+      <div class="rs-header">
+        <i class="fas fa-file-medical me-2"></i>AI-Generated Inspection Report
+        <span class="rs-badge">Gemini AI</span>
+        <button class="btn-copy ms-auto" id="copyBtn" onclick="copyReport()">
+          <i class="fas fa-copy me-1"></i>Copy Report
+        </button>
+      </div>
+      <div class="rs-body" id="reportBody"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="result-actions mt-4">
+      <button class="btn-new" onclick="resetForm()">
+        <i class="fas fa-arrow-left me-2"></i>Analyse Another Road
+      </button>
+      <button class="btn-download" onclick="downloadReport()">
+        <i class="fas fa-download me-2"></i>Download Report
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer class="site-footer">
+  <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+    <div class="footer-brand">RoadScan AI — Infrastructure Intelligence</div>
+    <div class="footer-tech">OpenCV · Scikit-learn · LangChain · Google Gemini · Flask</div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
